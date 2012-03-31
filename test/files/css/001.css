@@ -1,0 +1,11 @@
+body{
+  background: black;
+  color: white;
+  padding: 0;
+}
+a:hover, a:visited{
+  text-decoration: none;
+}
+.myclass {
+  background-image: url(foobar.png);
+}

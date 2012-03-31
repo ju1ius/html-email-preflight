@@ -1,0 +1,44 @@
+#! /usr/bin/php
+<?php
+
+require_once __DIR__.'/lib/vendor/Symfony/Component/ClassLoader/UniversalClassLoader.php';
+$loader = new Symfony\Component\ClassLoader\UniversalClassLoader();
+$loader->registerNamespaces(array(
+  'ju1ius' => array(
+    __DIR__.'/lib',
+    __DIR__.'/../ju1ius-libphp/lib',
+    __DIR__.'/../cssparser/lib',
+  ),
+  'Zend' => __DIR__.'/lib/vendor',
+  'Symfony' => __DIR__.'/lib/vendor',
+));
+$loader->register();
+
+use Symfony\Component\Console\Application;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\OutputInterface;
+
+use ju1ius\Html\EmailPreflight;
+
+$console = new Application();
+$console
+  ->register('toplaintext')
+  ->setDefinition(array(
+    new InputArgument('html_file', InputArgument::REQUIRED, 'Path/Url of an HTML file'),
+  ))
+  ->setDescription('Converts an HTML file to formatted plain text')
+  ->setCode(function (InputInterface $input, OutputInterface $output)
+  {
+    $html_file = $input->getArgument('html_file');
+
+    $preflight = new EmailPreflight();
+    $preflight->loadHtmlFile($html_file);
+
+    $text = $preflight->toPlaintext();
+    $output->writeln(sprintf('<info>%s</info>', $text));
+
+  })
+;
+$console->run();

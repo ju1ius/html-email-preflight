@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<text indent="  " par-prefix="* ">
+1 Blah blah blah
+blah blah blah
+  </text>
+<text indent="  " par-prefix="* ">
+2
+    <text indent="  " par-prefix="* ">2.1</text><text indent="  " par-prefix="* ">2.2</text>
+Blah blah
+Indent test
+  </text>
+<text indent="  " par-prefix="* ">3
+    <text indent="  " par-prefix="* ">3.1</text><text indent="  " par-prefix="* ">
+3.2 Hireozprf, fdsk;ez rezpz,fds
+            fkdsl fdsio zm dsqddlq zjkn.
+        <text indent="  " par-prefix="* ">3.2.1</text><text indent="  " par-prefix="* ">3.2.2</text><text indent="  " par-prefix="* ">
+3.2.3 fopw ezmpa fdmsspfjrmjs jkfds
+            fsmzae eakreoz mzrfle zfarop rezf
+          </text></text></text>
+<text indent="  " par-prefix="1. "/>
+<text indent="  " par-prefix="2. ">
+  <text indent="  " par-prefix="2.1. "/>
+  <text indent="  " par-prefix="2.2. ">
+    <text indent="  " par-prefix="2.2.1. "/>
+    <text indent="  " par-prefix="2.2.2. "/>
+    <text indent="  " par-prefix="2.2.3. "/>
+  </text>
+</text>
+<text indent="  " par-prefix="3. ">
+  <text indent="  " par-prefix="3.1. ">
+    <text indent="  " par-prefix="3.1.1. "/>
+    <text indent="  " par-prefix="3.1.2. "/>
+  </text>
+</text>
+<text indent="  " par-prefix="* ">
+  <text indent="  " par-prefix="1. "/>
+  <text indent="  " par-prefix="2. ">
+    <text indent="  " par-prefix="2.1. "/>
+  </text>
+</text>
+<text indent="  " par-prefix="* ">
+  <text indent="  " par-prefix="* ">
+    <text indent="  " par-prefix="1. ">
+      <text indent="  " par-prefix="* "/>
+      <text indent="  " par-prefix="* "/>
+    </text>
+    <text indent="  " par-prefix="2. "/>
+  </text>
+</text>
+<text indent="&gt; ">
+  Freizo rjkz lfmzup aiopeaea  eae hjkez
+  fdsflmfs eziorpz reuzioe fsndf mslkdf
+  <text indent="&gt; ">
+    fdklsmfs iozrpez ezkl
+    fsgaye nfs,d
+    jfsk ezui zfdl fsd fjdskiezf
+  </text><text indent="&gt; "><text indent="&gt; ">
+      FOOOOOO
+      <text indent="  " par-prefix="1. "><text indent="  " par-prefix="* "/></text><text indent="  " par-prefix="2. "><text indent="  " par-prefix="* "/></text><text indent="  " par-prefix="3. "><text indent="  " par-prefix="* "/></text>
+      BAAAAAr
+    </text>
+    BAAzzzz
+  </text></text>

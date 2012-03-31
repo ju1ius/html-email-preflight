@@ -1,0 +1,16 @@
+indent level
+indent char
+current indent
+list mode (ul|ol|dl)
+
+foreach nodes:
+  if node is TEXT_NODE:
+    wordwrap
+    apply current indent
+    return formatted node text
+  else if node is UL:
+    current indent = "  " * level
+    return parse children
+  else if node is LI:
+    text = "* "
+    text += parse children
