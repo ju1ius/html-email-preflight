@@ -9,3 +9,4 @@ tests with various URIs:
 	URI::normalize() ?
 	IRI ? (pear Net_IDNA2)
 
+cleanup the /test dir
