@@ -6,6 +6,7 @@ namespace ju1ius\Html;
 
 use ju1ius\Collections\ParameterBag;
 use ju1ius\Uri;
+use ju1ius\Text\Encoding;
 use ju1ius\Css;
 use ju1ius\Html\EmailPreflight\Warning;
 
@@ -109,7 +110,6 @@ class EmailPreflight
     $this->options = new ParameterBag(array(
       'warn_level'        => Warning::LEVEL_NONE,
       'base_url'          => null,
-      'encoding'          => 'utf-8',
       'css' => array(
         'to_html_attributes'     => true,
         'color_mode'             => 'hex',
@@ -127,15 +127,17 @@ class EmailPreflight
     ));
     $this->options->merge($options);
     //
-    $this->stylesheet_loader = new Css\StyleSheetLoader();
+    $this->stylesheet_loader = new Css\StyleSheetLoader(array(
+      'encoding' => 'utf-8'
+    ));
     $this->css_parser = new Css\Parser();
     $this->dom = new \DOMDocument();
+    $this->dom->substituteEntities = false;
     $this->plaintext_formatter = new Formatter\PlainText();
     //
     if($this->options->get('html.remove_whitespace')) {
       $this->dom->preserveWhiteSpace = false;
       $this->dom->formatOutput = false;
-      $this->dom->substituteEntities = false;
     }
   }/*}}}*/
 
@@ -173,6 +175,10 @@ class EmailPreflight
   public function loadHtml($html)
   {/*{{{*/
     $this->is_local_file = false;
+    $encoding = Encoding::detect($html);
+    if(!Encoding::isSameEncoding($encoding, 'utf-8')) {
+      $html = Encoding::convert($encoding, 'utf-8', $encoding);
+    }
     $this->dom->loadHTML($html);
     $this->initialize();
     return $this;
@@ -189,7 +195,12 @@ class EmailPreflight
   {/*{{{*/
     $this->html_file_uri = new Uri($file);
     $this->is_local_file = !$this->html_file_uri->isAbsoluteUrl();
-    $this->dom->loadHTMLFile($file);
+    $html = file_get_contents($file);
+    $encoding = Encoding::detect($html);
+    if(!Encoding::isSameEncoding($encoding, 'utf-8')) {
+      $html = Encoding::convert($encoding, 'utf-8', $encoding);
+    }
+    $this->dom->loadHTML($html);
     $this->initialize();
     return $this;
   }/*}}}*/
@@ -377,6 +388,14 @@ class EmailPreflight
 
   protected function initialize()
   {/*{{{*/
+    //
+    if($this->options->get('html.remove_whitespace')) {
+      $this->dom->preserveWhiteSpace = false;
+    }
+    $this->css_parser->getOptions()->set(
+      'strict_parsing', $this->options->get('strict_parsing')
+    );
+
     $this->xpath = new \DOMXPath($this->dom);
 
     $this->stylesheets = array();
