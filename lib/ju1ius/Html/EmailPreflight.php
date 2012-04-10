@@ -456,7 +456,7 @@ class EmailPreflight
         $media = $element->getAttribute('media');
         if($media) {
           try {
-            $media_list = $parser->parseMediaQuery($media);
+            $media_list = $this->css_parser->parseMediaQuery($media);
             if(!$this->checkMediaType($media_list)) {
               continue;
             }

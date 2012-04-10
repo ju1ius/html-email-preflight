@@ -6,7 +6,5 @@ base_url when loaded from Html string ???
 
 tests with various URIs:
 	urls, path, absolute, relative
-	URI::normalize() ?
-	IRI ? (pear Net_IDNA2)
 
 cleanup the /test dir

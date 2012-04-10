@@ -13,8 +13,8 @@
   ],
   "repositories": [
     {
-    "type": "vcs",
-    "url": "http://github.com/zendframework/zf2"
+      "type": "vcs",
+      "url": "http://github.com/zendframework/zf2"
     }
   ],
   "require": {
