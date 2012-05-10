@@ -22,6 +22,8 @@ use ju1ius\Html\EmailPreflight\Warning;
  **/
 class EmailPreflight
 {
+  const ENCODING = "utf-8";
+
   private static $CLIENT_SUPPORT = null;
 
   private static $VALID_MEDIAS = array(
@@ -82,7 +84,7 @@ class EmailPreflight
 
   private
     $options,
-    $stylesheet_loader,
+    $css_lexer,
     $css_parser,
     $dom,
     $xpath,
@@ -126,13 +128,13 @@ class EmailPreflight
       )
     ));
     $this->options->merge($options);
-    //
-    $this->stylesheet_loader = new Css\StyleSheetLoader(array(
-      'encoding' => 'utf-8'
-    ));
-    $this->css_parser = new Css\Parser();
+
     $this->dom = new \DOMDocument();
     $this->dom->substituteEntities = false;
+
+    $this->css_lexer = new Css\Lexer();
+    $this->css_parser = new Css\Parser($this->css_lexer);
+
     $this->plaintext_formatter = new Formatter\PlainText();
     //
     if($this->options->get('html.remove_whitespace')) {
@@ -176,8 +178,8 @@ class EmailPreflight
   {/*{{{*/
     $this->is_local_file = false;
     $encoding = Encoding::detect($html);
-    if(!Encoding::isSameEncoding($encoding, 'utf-8')) {
-      $html = Encoding::convert($encoding, 'utf-8', $encoding);
+    if(!Encoding::isSameEncoding($encoding, self::ENCODING)) {
+      $html = Encoding::convert($encoding, self::ENCODING, $encoding);
     }
     $this->dom->loadHTML($html);
     $this->initialize();
@@ -197,8 +199,8 @@ class EmailPreflight
     $this->is_local_file = !$this->html_file_uri->isAbsoluteUrl();
     $html = file_get_contents($file);
     $encoding = Encoding::detect($html);
-    if(!Encoding::isSameEncoding($encoding, 'utf-8')) {
-      $html = Encoding::convert($encoding, 'utf-8', $encoding);
+    if(!Encoding::isSameEncoding($encoding, self::ENCODING)) {
+      $html = Encoding::convert($encoding, self::ENCODING, $encoding);
     }
     $this->dom->loadHTML($html);
     $this->initialize();
@@ -242,9 +244,8 @@ class EmailPreflight
    **/
   public function appendStyleSheetFile($url, $inline=true)
   {/*{{{*/
-    $stylesheet = $this->css_parser->parse(
-      $this->stylesheet_loader->load($url)
-    );
+    $this->css_lexer->setSource(Css\Loader::load($url));
+    $stylesheet = $this->css_parser->parseStyleSheet();
     return $this->appendStyleSheet($stylesheet, $inline);
   }/*}}}*/
   /**
@@ -257,9 +258,8 @@ class EmailPreflight
    **/
   public function prependStyleSheetFile($url, $inline=true)
   {/*{{{*/
-    $stylesheet = $this->css_parser->parse(
-      $this->stylesheet_loader->load($url)
-    );
+    $this->css_lexer->setSource(Css\Loader::load($url));
+    $stylesheet = $this->css_parser->parseStyleSheet();
     return $this->prependStyleSheet($stylesheet, $inline);
   }/*}}}*/
   /**
@@ -272,9 +272,8 @@ class EmailPreflight
    **/
   public function appendCssText($css, $inline=true)
   {/*{{{*/
-    $stylesheet = $this->css_parser->parse(
-      $this->stylesheet_loader->loadString($css)
-    );
+    $this->css_lexer->setSource(Css\Loader::loadString($css));
+    $stylesheet = $this->css_parser->parseStyleSheet();
     return $this->appendStyleSheet($stylesheet, $inline);
   }/*}}}*/
   /**
@@ -287,9 +286,8 @@ class EmailPreflight
    **/
   public function prependCssText($css, $inline=true)
   {/*{{{*/
-    $stylesheet = $this->css_parser->parse(
-      $this->stylesheet_loader->loadString($css)
-    );
+    $this->css_lexer->setSource(Css\Loader::loadString($css));
+    $stylesheet = $this->css_parser->parseStyleSheet();
     return $this->prependStyleSheet($stylesheet, $inline);
   }/*}}}*/
 
@@ -392,9 +390,7 @@ class EmailPreflight
     if($this->options->get('html.remove_whitespace')) {
       $this->dom->preserveWhiteSpace = false;
     }
-    $this->css_parser->getOptions()->set(
-      'strict_parsing', $this->options->get('strict_parsing')
-    );
+    $this->css_parser->setStrict($this->options->get('strict_parsing'));
 
     $this->xpath = new \DOMXPath($this->dom);
 
@@ -456,7 +452,8 @@ class EmailPreflight
         $media = $element->getAttribute('media');
         if($media) {
           try {
-            $media_list = $this->css_parser->parseMediaQuery($media);
+            $this->css_lexer->setSource(Css\Loader::loadString($media));
+            $media_list = $this->css_parser->parseMediaQuery();
             if(!$this->checkMediaType($media_list)) {
               continue;
             }
@@ -465,15 +462,19 @@ class EmailPreflight
           }
         }
         $href = $element->getAttribute('href');
-        $stylesheet = $this->css_parser->parse(
-          $this->stylesheet_loader->load($href)
-        );
+        try {
+          $source = Css\Loader::load($href);
+        } catch(StyleSheetNotFoundException $e) {
+          $this->css_warnings[] = $e->getMessage();
+          continue;
+        }
+        $this->css_lexer->setSource($source);
+        $stylesheet = $this->css_parser->parseStyleSheet();
 
       } else if($element->tagName === "style") {
 
-        $stylesheet = $this->css_parser->parse(
-          $this->stylesheet_loader->loadString($element->textContent)
-        );
+        $this->css_lexer->setSource(Css\Loader::loadString($element->textContent));
+        $stylesheet = $this->css_parser->parseStyleSheet();
 
       }
       if($element->getAttribute('data-inline') === "false") {
@@ -590,7 +591,8 @@ class EmailPreflight
             $style_attr = $element->getAttribute('style');
             if ($style_attr) {
               try {
-                $style_declaration = $this->css_parser->parseStyleDeclaration($style_attr);
+                $this->css_lexer->setSource(Css\Loader::loadString($style_attr));
+                $style_declaration = $this->css_parser->parseStyleDeclaration();
                 $stylemap[$path][] = array(
                   'specificity' => 1000,
                   'style_declaration' => $style_declaration

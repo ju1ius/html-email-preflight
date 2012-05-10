@@ -6,8 +6,8 @@ $loader->registerNamespace(
   'ju1ius',
   array(
     __DIR__.'/../lib',
-    __DIR__.'/../../ju1ius-libphp/lib',
-    __DIR__.'/../../cssparser/lib',
+    __DIR__.'/../../libphp/lib',
+    __DIR__.'/../../css-parser/lib',
   )
 );
 $loader->registerNamespace('Zend', __DIR__.'/../lib/vendor');
